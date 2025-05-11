@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, redirect, url_for
 import json, uuid, os
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates", static_folder="static")
 
 data_file = 'data.json'
 if not os.path.exists(data_file):
@@ -16,7 +16,7 @@ def index():
 def create():
     with open(data_file, 'r') as f:
         data = json.load(f)
-    
+
     short_id = uuid.uuid4().hex[:6]
     data[short_id] = {
         "url": request.form['url'],
@@ -36,11 +36,9 @@ def preview(id):
         data = json.load(f)
 
     if id in data:
-        return render_template("og_page.html", **data[id])
+        return render_template("og_page.html", **data[id], request=request)
     else:
         return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    import os
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-
