@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Custom Share Link</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Create a Custom Link Preview</h1>
+    <form action="/create" method="POST">
+        <input type="text" name="url" placeholder="Target URL" required>
+        <input type="text" name="title" placeholder="Custom Title" required>
+        <textarea name="description" placeholder="Custom Description" required></textarea>
+        <input type="text" name="image" placeholder="Thumbnail Image URL" required>
+        <button type="submit">Generate Link</button>
+    </form>
+</body>
+</html>
