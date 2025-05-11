@@ -5,11 +5,19 @@
     <meta property="og:title" content="{{ title }}">
     <meta property="og:description" content="{{ desc }}">
     <meta property="og:image" content="{{ image }}">
-    <meta property="og:url" content="{{ url }}">
-    <meta http-equiv="refresh" content="2;url={{ url }}">
-    <title>Redirecting...</title>
+    <meta property="og:url" content="{{ request.url }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>{{ title }}</title>
+
+    <!-- Redirect after delay so bots can scrape OG tags -->
+    <script>
+        setTimeout(function() {
+            window.location.href = "{{ url }}";
+        }, 4000); // 4 seconds delay
+    </script>
 </head>
 <body>
-    <p>Redirecting to <a href="{{ url }}">{{ url }}</a>...</p>
+    <h2>Preview loading...</h2>
+    <p>You’ll be redirected shortly to: <a href="{{ url }}">{{ url }}</a></p>
 </body>
 </html>
