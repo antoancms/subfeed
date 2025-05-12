@@ -13,7 +13,7 @@
         <textarea name="description" placeholder="Custom Description" required>{{ edit_data.desc if edit_data else '' }}</textarea>
         <input type="text" name="image" placeholder="Thumbnail Image URL" required value="{{ edit_data.image if edit_data else '' }}">
         <input type="text" name="custom_id" placeholder="UTM Source (required)" required value="{{ edit_data.custom_id if edit_data else '' }}">
-        <textarea name="popup_text" placeholder="Paste HTML here to show inside popup (images, formatting allowed)" required style="height: 150px; font-family: monospace;">
+        <textarea name="popup_text" placeholder="Paste HTML here to show inside popup (images, links, formatting allowed)" required style="height: 150px; font-family: monospace;">{{ edit_data.popup if edit_data and edit_data.popup else '' }}</textarea>
         <button type="submit">Create or Update Link</button>
     </form>
 
