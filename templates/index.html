@@ -64,5 +64,32 @@
       }
     });
     </script>
+
+    <!-- Enhance Blogger popup behavior -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const container = document.getElementById("popup-content");
+      if (!container) return;
+
+      const fullHtml = container.innerHTML.trim();
+      const textOnly = container.innerText || container.textContent || "";
+      const words = textOnly.split(/\s+/);
+
+      if (words.length > 100) {
+        const short = words.slice(0, 100).join(" ") + "... ";
+        container.innerHTML = `${short}<button id="read-more" style="color:blue;border:none;background:none;cursor:pointer;font-weight:bold;">Read more</button>`;
+        document.getElementById("read-more").onclick = () => {
+          container.innerHTML = fullHtml;
+        };
+      }
+
+      // Add event delegation for close button if present
+      const overlay = document.getElementById("popup-overlay");
+      const closeBtn = overlay?.querySelector("button");
+      if (closeBtn) {
+        closeBtn.onclick = () => overlay.remove();
+      }
+    });
+    </script>
 </body>
 </html>
