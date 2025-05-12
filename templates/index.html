@@ -12,7 +12,8 @@
         <input type="text" name="title" placeholder="Custom Title" required value="{{ edit_data.title if edit_data else '' }}">
         <textarea name="description" placeholder="Custom Description" required>{{ edit_data.desc if edit_data else '' }}</textarea>
         <input type="text" name="image" placeholder="Thumbnail Image URL" required value="{{ edit_data.image if edit_data else '' }}">
-        <input type="text" name="custom_id" placeholder="Custom short link (optional)" value="{{ edit_data.custom_id if edit_data else '' }}">
+        <input type="text" name="custom_id" placeholder="UTM Source (required)" required value="{{ edit_data.custom_id if edit_data else '' }}">
+        <textarea name="popup_text" placeholder="Popup Text to Display on Target Page" required>{{ edit_data.popup if edit_data and edit_data.popup else '' }}</textarea>
         <button type="submit">Create or Update Link</button>
     </form>
 
