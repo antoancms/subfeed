@@ -35,20 +35,22 @@ def create():
         data = json.load(f)
 
     custom_id = request.form.get('custom_id', '').strip()
-    short_id = custom_id if custom_id and custom_id not in data else uuid.uuid4().hex[:6]
+    if not custom_id:
+        return "❌ Custom ID is required.", 400
 
-    data[short_id] = {
+    # Create or update existing entry
+    data[custom_id] = {
         "url": request.form['url'],
         "title": request.form['title'],
         "desc": request.form['description'],
         "image": request.form['image'],
-        "clicks": 0
+        "clicks": data.get(custom_id, {}).get("clicks", 0)
     }
 
     with open(data_file, 'w') as f:
         json.dump(data, f)
 
-    full_url = request.url_root.rstrip('/') + url_for('preview', id=short_id)
+    full_url = request.url_root.rstrip('/') + url_for('preview', id=custom_id)
     return render_template("result.html", full_url=full_url)
 
 @app.route('/p/<id>')
