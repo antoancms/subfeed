@@ -1,0 +1,74 @@
+<!-- templates/result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Link Created</title>
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .card {
+            background: #fff;
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button, a.share-btn {
+            display: inline-block;
+            background: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 5px 0;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        a.share-btn.facebook { background: #4267B2; }
+        a.share-btn.twitter  { background: #1DA1F2; }
+        a.share-btn.whatsapp { background: #25D366; }
+        button:hover, a.share-btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>✅ Your Link Has Been Created!</h2>
+        <input type="text" id="preview-url" value="{{ full_url }}" readonly>
+        <br>
+        <button onclick="copyLink()">📋 Copy Link</button>
+
+        <div style="margin-top: 20px;">
+            <a class="share-btn facebook" href="https://www.facebook.com/sharer/sharer.php?u={{ full_url }}" target="_blank">🔵 Share on Facebook</a>
+            <a class="share-btn twitter" href="https://twitter.com/intent/tweet?url={{ full_url }}" target="_blank">🐦 Tweet</a>
+            <a class="share-btn whatsapp" href="https://api.whatsapp.com/send?text={{ full_url }}" target="_blank">🟢 WhatsApp</a>
+        </div>
+    </div>
+
+    <script>
+        function copyLink() {
+            const input = document.getElementById("preview-url");
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            alert("✅ Link copied: " + input.value);
+        }
+    </script>
+</body>
+</html>
