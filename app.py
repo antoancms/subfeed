@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 import json, uuid, os
 from datetime import datetime
 
@@ -110,6 +110,14 @@ def preview(id):
         return render_template("og_page.html", **data[id], request=request)
     else:
         return redirect(url_for('index'))
+
+@app.route('/api/popup/<utm>')
+def get_popup_text(utm):
+    with open(data_file, 'r') as f:
+        data = json.load(f)
+    if utm in data:
+        return jsonify({"text": data[utm].get("popup", "")})
+    return jsonify({"text": ""})
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
