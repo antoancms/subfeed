@@ -8,12 +8,34 @@
 <body>
     <h1>Create or Edit a Custom Link Preview</h1>
     <form action="/create" method="POST">
-        <input type="text" name="custom_id" placeholder="Enter custom short link to create or edit" required>
-        <input type="text" name="url" placeholder="Target URL" required>
-        <input type="text" name="title" placeholder="Custom Title" required>
-        <textarea name="description" placeholder="Custom Description" required></textarea>
-        <input type="text" name="image" placeholder="Thumbnail Image URL" required>
+        <input type="text" name="custom_id" placeholder="Enter custom short link to create or edit" required value="{{ edit_data.custom_id if edit_data else '' }}">
+        <input type="text" name="url" placeholder="Target URL" required value="{{ edit_data.url if edit_data else '' }}">
+        <input type="text" name="title" placeholder="Custom Title" required value="{{ edit_data.title if edit_data else '' }}">
+        <textarea name="description" placeholder="Custom Description" required>{{ edit_data.desc if edit_data else '' }}</textarea>
+        <input type="text" name="image" placeholder="Thumbnail Image URL" required value="{{ edit_data.image if edit_data else '' }}">
         <button type="submit">Create or Update Link</button>
     </form>
+
+    {% if links %}
+        <h2>🔗 Existing Links</h2>
+        <table border="1" cellpadding="10" cellspacing="0">
+            <tr>
+                <th>Custom ID</th>
+                <th>Title</th>
+                <th>Clicks</th>
+                <th>Preview</th>
+                <th>Action</th>
+            </tr>
+            {% for link in links %}
+            <tr>
+                <td>{{ link.id }}</td>
+                <td>{{ link.title }}</td>
+                <td>{{ link.clicks }}</td>
+                <td><a href="/p/{{ link.id }}" target="_blank">View</a></td>
+                <td><a href="/edit/{{ link.id }}">✏️ Edit</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
 </body>
 </html>
