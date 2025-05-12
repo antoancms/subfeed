@@ -28,8 +28,8 @@ def create():
     with open(data_file, 'w') as f:
         json.dump(data, f)
 
-full_url = request.url_root.rstrip('/') + url_for('preview', id=short_id)
-return render_template("result.html", full_url=full_url)
+    full_url = request.url_root.rstrip('/') + url_for('preview', id=short_id)
+    return render_template("result.html", full_url=full_url)
 
 @app.route('/p/<id>')
 def preview(id):
