@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <title>Create or Edit Custom Share Link</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+      tinymce.init({
+        selector: 'textarea[name="popup_text"]',
+        height: 250,
+        menubar: false,
+        plugins: 'link image code lists',
+        toolbar: 'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code',
+        branding: false
+      });
+    </script>
 </head>
 <body>
     <h1>Create or Edit a Custom Link Preview</h1>
@@ -13,7 +24,7 @@
         <textarea name="description" placeholder="Custom Description" required>{{ edit_data.desc if edit_data else '' }}</textarea>
         <input type="text" name="image" placeholder="Thumbnail Image URL" required value="{{ edit_data.image if edit_data else '' }}">
         <input type="text" name="custom_id" placeholder="UTM Source (required)" required value="{{ edit_data.custom_id if edit_data else '' }}">
-        <textarea name="popup_text" placeholder="Paste HTML here to show inside popup (images, links, formatting allowed)" required style="height: 150px; font-family: monospace;">{{ (edit_data.popup | e) if edit_data and edit_data.popup else '' }}</textarea>
+        <textarea name="popup_text" placeholder="Paste HTML here to show inside popup (images, links, formatting allowed)" required>{{ (edit_data.popup | e) if edit_data and edit_data.popup else '' }}</textarea>
         <button type="submit">Create or Update Link</button>
     </form>
 
