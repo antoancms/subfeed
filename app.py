@@ -1,9 +1,11 @@
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
+from flask_cors import CORS
 import json, uuid, os
 from datetime import datetime
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = 'your_secret_key_here'
+CORS(app)  # Enables cross-origin API access for Blogger
 
 data_file = 'data.json'
 if not os.path.exists(data_file):
