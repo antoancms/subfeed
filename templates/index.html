@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Create Custom Share Link</title>
+    <title>Create or Edit Custom Share Link</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Create a Custom Link Preview</h1>
+    <h1>Create or Edit a Custom Link Preview</h1>
     <form action="/create" method="POST">
+        <input type="text" name="custom_id" placeholder="Enter custom short link to create or edit" required>
         <input type="text" name="url" placeholder="Target URL" required>
         <input type="text" name="title" placeholder="Custom Title" required>
         <textarea name="description" placeholder="Custom Description" required></textarea>
         <input type="text" name="image" placeholder="Thumbnail Image URL" required>
-        <input type="text" name="custom_id" placeholder="Custom short link (optional)">
-        <button type="submit">Generate Link</button>
+        <button type="submit">Create or Update Link</button>
     </form>
 </body>
 </html>
