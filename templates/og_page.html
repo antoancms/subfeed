@@ -1,3 +1,4 @@
+<!-- templates/og_page.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,15 +10,39 @@
     <meta name="twitter:card" content="summary_large_image">
     <title>{{ title }}</title>
 
-    <!-- Redirect after delay so bots can scrape OG tags -->
+    <!-- Instant redirect for users; bots will ignore JS and scrape OG tags -->
     <script>
-        setTimeout(function() {
-            window.location.href = "{{ url }}";
-        }, 4000); // 4 seconds delay
+        if (!navigator.userAgent.includes('facebookexternalhit') &&
+            !navigator.userAgent.includes('Twitterbot') &&
+            !navigator.userAgent.includes('Slackbot')) {
+            window.location.replace("{{ url }}");
+        }
     </script>
 </head>
 <body>
-    <h2>Preview loading...</h2>
-    <p>You’ll be redirected shortly to: <a href="{{ url }}">{{ url }}</a></p>
+    <noscript>
+        <meta http-equiv="refresh" content="2;url={{ url }}">
+        <p>Redirecting to <a href="{{ url }}">{{ url }}</a>...</p>
+    </noscript>
+
+    <div style="text-align:center; margin-top: 100px; font-family: Arial;">
+        <h2>✅ Your custom preview link is ready!</h2>
+        <p>Share or copy this link:</p>
+        <input type="text" id="share-url" value="{{ request.url }}" readonly style="width: 80%; padding: 10px; font-size: 16px;">
+        <br><br>
+        <button onclick="copyLink()" style="padding: 10px 20px; font-size: 16px;">📋 Copy</button>
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank" style="margin-left: 10px;">🔗 Share on Facebook</a>
+        <a href="https://twitter.com/intent/tweet?url={{ request.url }}" target="_blank" style="margin-left: 10px;">🐦 Tweet</a>
+    </div>
+
+    <script>
+        function copyLink() {
+            var copyText = document.getElementById("share-url");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // For mobile
+            document.execCommand("copy");
+            alert("Copied the link: " + copyText.value);
+        }
+    </script>
 </body>
 </html>
