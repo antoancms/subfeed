@@ -41,7 +41,7 @@ def create():
 
     custom_id = request.form.get('custom_id', '').strip()
     if not custom_id:
-        return "❌ Custom ID is required.", 400
+        custom_id = uuid.uuid4().hex[:6]
 
     # Create or update existing entry
     data[custom_id] = {
@@ -70,6 +70,21 @@ def edit(custom_id):
         return "❌ Link not found.", 404
 
     return render_template("index.html", edit_data={"custom_id": custom_id, **data[custom_id]})
+
+@app.route('/delete/<custom_id>', methods=['POST'])
+def delete(custom_id):
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+
+    with open(data_file, 'r') as f:
+        data = json.load(f)
+
+    if custom_id in data:
+        del data[custom_id]
+        with open(data_file, 'w') as f:
+            json.dump(data, f)
+
+    return redirect(url_for('home'))
 
 @app.route('/p/<id>')
 def preview(id):
