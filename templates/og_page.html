@@ -20,6 +20,54 @@
             window.location.replace("{{ url }}");
         }
     </script>
+
+    <style>
+        body {
+            background: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            text-align: center;
+            padding: 40px;
+        }
+        .card {
+            background: #fff;
+            max-width: 600px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .share-box input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .actions {
+            margin-top: 20px;
+        }
+        .actions button,
+        .actions a {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #fff;
+            font-weight: bold;
+        }
+        .copy-btn {
+            background: #007BFF;
+        }
+        .fb-btn {
+            background: #4267B2;
+        }
+        .tw-btn {
+            background: #1DA1F2;
+        }
+    </style>
 </head>
 <body>
     <noscript>
@@ -27,23 +75,26 @@
         <p>Redirecting to <a href="{{ url }}">{{ url }}</a>...</p>
     </noscript>
 
-    <div style="text-align:center; margin-top: 100px; font-family: Arial;">
+    <div class="card">
         <h2>✅ Your custom preview link is ready!</h2>
-        <p>Share or copy this link:</p>
-        <input type="text" id="share-url" value="{{ request.url }}" readonly style="width: 80%; padding: 10px; font-size: 16px;">
-        <br><br>
-        <button onclick="copyLink()" style="padding: 10px 20px; font-size: 16px;">📋 Copy</button>
-        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank" style="margin-left: 10px;">🔗 Share on Facebook</a>
-        <a href="https://twitter.com/intent/tweet?url={{ request.url }}" target="_blank" style="margin-left: 10px;">🐦 Tweet</a>
+        <p>Copy or share this link below:</p>
+        <div class="share-box">
+            <input type="text" id="share-url" value="{{ request.url }}" readonly>
+        </div>
+        <div class="actions">
+            <button class="copy-btn" onclick="copyLink()">📋 Copy Link</button>
+            <a class="fb-btn" href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank">🔗 Share on Facebook</a>
+            <a class="tw-btn" href="https://twitter.com/intent/tweet?url={{ request.url }}" target="_blank">🐦 Tweet</a>
+        </div>
     </div>
 
     <script>
         function copyLink() {
             var copyText = document.getElementById("share-url");
             copyText.select();
-            copyText.setSelectionRange(0, 99999); // For mobile
+            copyText.setSelectionRange(0, 99999);
             document.execCommand("copy");
-            alert("Copied the link: " + copyText.value);
+            alert("✅ Link copied to clipboard: " + copyText.value);
         }
     </script>
 </body>
