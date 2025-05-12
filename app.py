@@ -24,7 +24,12 @@ def index():
 def home():
     if not session.get('authenticated'):
         return redirect(url_for('index'))
-    return render_template('index.html')
+
+    with open(data_file, 'r') as f:
+        data = json.load(f)
+
+    links = [{"id": key, **value} for key, value in data.items()]
+    return render_template('index.html', links=links)
 
 @app.route('/create', methods=['POST'])
 def create():
@@ -52,6 +57,19 @@ def create():
 
     full_url = request.url_root.rstrip('/') + url_for('preview', id=custom_id)
     return render_template("result.html", full_url=full_url)
+
+@app.route('/edit/<custom_id>')
+def edit(custom_id):
+    if not session.get('authenticated'):
+        return redirect(url_for('index'))
+
+    with open(data_file, 'r') as f:
+        data = json.load(f)
+
+    if custom_id not in data:
+        return "❌ Link not found.", 404
+
+    return render_template("index.html", edit_data={"custom_id": custom_id, **data[custom_id]})
 
 @app.route('/p/<id>')
 def preview(id):
