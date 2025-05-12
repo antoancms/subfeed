@@ -1,8 +1,9 @@
 from flask import Flask, request, render_template, redirect, url_for, session
 import json, uuid, os
+from datetime import datetime
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.secret_key = 'your_secret_key_here'  # Replace with a secure secret key
+app.secret_key = 'your_secret_key_here'
 
 data_file = 'data.json'
 if not os.path.exists(data_file):
@@ -41,15 +42,20 @@ def create():
 
     custom_id = request.form.get('custom_id', '').strip()
     if not custom_id:
-        custom_id = uuid.uuid4().hex[:6]
+        return "❌ UTM Source is required.", 400
 
-    # Create or update existing entry
+    target_url = request.form['url']
+    if '?utm_source=' not in target_url:
+        target_url += f"?utm_source={custom_id}"
+
     data[custom_id] = {
-        "url": request.form['url'],
+        "url": target_url,
         "title": request.form['title'],
         "desc": request.form['description'],
         "image": request.form['image'],
-        "clicks": data.get(custom_id, {}).get("clicks", 0)
+        "popup": request.form['popup_text'],
+        "clicks": data.get(custom_id, {}).get("clicks", 0),
+        "log": data.get(custom_id, {}).get("log", {})
     }
 
     with open(data_file, 'w') as f:
@@ -93,8 +99,14 @@ def preview(id):
 
     if id in data:
         data[id]['clicks'] = data[id].get('clicks', 0) + 1
+        today = datetime.now().strftime('%Y-%m-%d')
+        log = data[id].get('log', {})
+        log[today] = log.get(today, 0) + 1
+        data[id]['log'] = log
+
         with open(data_file, 'w') as f:
             json.dump(data, f)
+
         return render_template("og_page.html", **data[id], request=request)
     else:
         return redirect(url_for('index'))
