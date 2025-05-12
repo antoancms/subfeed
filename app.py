@@ -34,12 +34,15 @@ def create():
     with open(data_file, 'r') as f:
         data = json.load(f)
 
-    short_id = uuid.uuid4().hex[:6]
+    custom_id = request.form.get('custom_id', '').strip()
+    short_id = custom_id if custom_id and custom_id not in data else uuid.uuid4().hex[:6]
+
     data[short_id] = {
         "url": request.form['url'],
         "title": request.form['title'],
         "desc": request.form['description'],
-        "image": request.form['image']
+        "image": request.form['image'],
+        "clicks": 0
     }
 
     with open(data_file, 'w') as f:
@@ -54,6 +57,9 @@ def preview(id):
         data = json.load(f)
 
     if id in data:
+        data[id]['clicks'] = data[id].get('clicks', 0) + 1
+        with open(data_file, 'w') as f:
+            json.dump(data, f)
         return render_template("og_page.html", **data[id], request=request)
     else:
         return redirect(url_for('index'))
