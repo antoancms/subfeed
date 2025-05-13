@@ -26,7 +26,7 @@ def home():
     if not session.get('authenticated'):
         return redirect(url_for('index'))
 
-    with open(data_file, ' 'r') as f:
+    with open(data_file, 'r') as f:
         data = json.load(f)
 
     links = [{"id": key, **value} for key, value in data.items()]
@@ -44,11 +44,12 @@ def create():
     if not custom_id:
         return "❌ UTM Source is required.", 400
 
-    # Append utm_source only if not already present
-    url = request.form['url']
-    if url and 'utm_source=' not in url:
-        url += f"?utm_source={custom_id}"
-    elif not url:
+    # Append or merge utm_source properly
+    url = request.form['url'].strip()
+    if url:
+        if 'utm_source=' not in url:
+            url += ('&' if '?' in url else '?') + f"utm_source={custom_id}"
+    else:
         url = data.get(custom_id, {}).get("url", "")
 
     data[custom_id] = {
