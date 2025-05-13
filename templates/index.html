@@ -3,154 +3,113 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SubFeed Publisher Platform</title>
+  <title>My UTM Links – SubFeed</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    /* Custom accent colors */
-    .feature-icon { font-size: 2rem; color: #0d6efd; }
-    .bg-hero { background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%); }
-  </style>
 </head>
-<body>
-
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+<body class="bg-white">
+  <nav class="navbar navbar-light bg-light mb-4">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="#">SubFeed</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-              data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navMenu">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="#hero">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
-          <li class="nav-item"><a class="nav-link" href="#benefits">Admin Benefits</a></li>
-        </ul>
-        <a class="btn btn-primary" href="#login">Login</a>
-      </div>
+      <a class="navbar-brand" href="#">SubFeed Admin</a>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section id="hero" class="bg-hero text-white text-center py-5">
-    <div class="container">
-      <h1 class="display-4 fw-bold">Next-Level UTM & Popup Management</h1>
-      <p class="lead mb-4">Seamlessly create trackable UTM short-links, design rich HTML pop-ups, and monitor real-time performance—all in one place.</p>
-      <a href="#login" class="btn btn-light btn-lg">Get Started</a>
+  <div class="container">
+    <!-- Table of Links -->
+    <h3 class="mb-3">Your Short Links</h3>
+    <div class="table-responsive mb-5">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Destination URL</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>UTM</th>
+            <th>Popup</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for link in links %}
+          <tr>
+            <td><a href="{{ link.url }}" target="_blank">{{ link.url }}</a></td>
+            <td>{{ link.title if link.title else '–' }}</td>
+            <td>{{ link.desc if link.desc else '–' }}</td>
+            <td>{{ link.id }}</td>
+            <td>
+              {% if link.popup %}
+                <span class="badge bg-primary">Yes</span>
+              {% else %}
+                <span class="badge bg-secondary">No</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{{ url_for('edit', custom_id=link.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+              <form action="{{ url_for('delete', custom_id=link.id) }}" method="POST" class="d-inline">
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-  </section>
 
-  <!-- Script Features -->
-  <section id="features" class="container py-5">
-    <h2 class="mb-4 text-center">Script Features</h2>
-    <div class="row g-4">
-      <div class="col-md-6">
-        <div class="d-flex">
-          <div class="feature-icon me-3">🔧</div>
-          <div>
-            <h5>Dynamic Content</h5>
-            <p>Change title, image, and destination URL for any existing link without breaking your shared URLs.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="d-flex">
-          <div class="feature-icon me-3">💬</div>
-          <div>
-            <h5>Targeted Pop-Ups</h5>
-            <p>Serve custom HTML pop-ups on specific UTM codes only—bots and untargeted visits never see them.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="d-flex">
-          <div class="feature-icon me-3">🔄</div>
-          <div>
-            <h5>Non-Destructive Edits</h5>
-            <p>Update URL, title or description without losing the original UTM link or stats you’ve already shared.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="d-flex">
-          <div class="feature-icon me-3">📊</div>
-          <div>
-            <h5>Real-Time Tracking</h5>
-            <p>See how many visitors each targeted link receives—daily logs and total counts persist forever.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Admin Benefits -->
-  <section id="benefits" class="bg-light py-5">
-    <div class="container">
-      <h2 class="mb-4 text-center">Admin Benefits</h2>
-      <div class="row g-4">
+    <!-- Create / Edit Form -->
+    <h3 class="mb-3">{{ edit_data and 'Edit Link' or 'Create New Link' }}</h3>
+    <form action="{{ url_for('create') }}" method="POST">
+      <div class="row g-3">
         <div class="col-md-6">
-          <div class="d-flex">
-            <div class="feature-icon me-3">💰</div>
-            <div>
-              <h5>High-RPM Threads</h5>
-              <p>Attract and load high-paying ad threads in pop-ups while delivering the correct Facebook article in the background.</p>
-            </div>
-          </div>
+          <label class="form-label">Destination URL</label>
+          <input type="url" name="url" value="{{ edit_data.url if edit_data }}" class="form-control" required>
         </div>
         <div class="col-md-6">
-          <div class="d-flex">
-            <div class="feature-icon me-3">🤖</div>
-            <div>
-              <h5>Bot Protection</h5>
-              <p>Pop-ups only appear on UTM links—automated bots or untargeted visitors never trigger your ad strategy.</p>
-            </div>
-          </div>
+          <label class="form-label">UTM Source</label>
+          <input type="text" name="custom_id" value="{{ edit_data.custom_id if edit_data }}" class="form-control" required>
         </div>
         <div class="col-md-6">
-          <div class="d-flex">
-            <div class="feature-icon me-3">🚀</div>
-            <div>
-              <h5>First-Impression Load</h5>
-              <p>The pop-up fires on the very first page impression—refreshes won’t re-trigger it, ensuring a seamless user experience.</p>
-            </div>
-          </div>
+          <label class="form-label">Title</label>
+          <input type="text" name="title" value="{{ edit_data.title if edit_data }}" class="form-control">
         </div>
         <div class="col-md-6">
-          <div class="d-flex">
-            <div class="feature-icon me-3">⚙️</div>
-            <div>
-              <h5>Full Control</h5>
-              <p>One dashboard to manage all links, pop-ups, and analytics—no more scattered scripts or manual tracking.</p>
-            </div>
-          </div>
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control" rows="2">{{ edit_data.desc if edit_data }}</textarea>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Popup HTML</label>
+          <textarea name="popup_text" class="form-control" rows="5">{{ edit_data.popup if edit_data }}</textarea>
+        </div>
+
+        <!-- Link Analytics (only when editing) -->
+        {% if edit_data %}
+        <div class="col-12">
+          <h5>Analytics</h5>
+          <p><strong>Total Clicks:</strong> {{ edit_data.clicks }}</p>
+          <ul class="list-unstyled small">
+            {% for day, cnt in edit_data.log.items() %}
+              <li>{{ day }}: {{ cnt }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <div class="col-12 text-end">
+          <button class="btn btn-success">{{ edit_data and 'Save Changes' or 'Create Link' }}</button>
         </div>
       </div>
-    </div>
-  </section>
+    </form>
+  </div>
 
-  <!-- Login Form -->
-  <section id="login" class="py-5">
-    <div class="container d-flex justify-content-center">
-      <div class="card shadow-sm p-4" style="max-width:400px; width:100%;">
-        <h3 class="text-center mb-3">Publisher Login</h3>
-        <form method="POST">
-          <div class="mb-3">
-            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
-          </div>
-          <button class="btn btn-primary w-100">Unlock Dashboard</button>
-          {% if error %}
-            <div class="alert alert-danger mt-3">{{ error }}</div>
-          {% endif %}
-        </form>
-      </div>
-    </div>
-  </section>
-
-  <footer class="text-center py-3 bg-white">
-    <small>© {{ now().year }} SubFeed. All rights reserved.</small>
-  </footer>
-
+  <!-- TinyMCE with your API key -->
+  <script src="https://cdn.tiny.cloud/1/9zoa256jx88gr3i2njll487m7bupp8ygbhyttgmc7rz4on6c/tinymce.min.js" referrerpolicy="origin"></script>
+  <script>
+    tinymce.init({
+      selector: 'textarea[name="popup_text"]',
+      plugins: ['link', 'image', 'lists', 'code'],
+      toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code',
+      menubar: false,
+      height: 300
+    });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
