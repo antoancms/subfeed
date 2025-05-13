@@ -14,16 +14,34 @@
   </nav>
 
   <div class="container">
+    <!-- Table of Links -->
     <h3 class="mb-3">Your Short Links</h3>
     <div class="table-responsive mb-5">
       <table class="table table-striped">
-        <thead><tr><th>UTM</th><th>URL</th><th>Clicks</th><th>Actions</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Destination URL</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>UTM</th>
+            <th>Popup</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
         <tbody>
           {% for link in links %}
           <tr>
-            <td>{{ link.id }}</td>
             <td><a href="{{ link.url }}" target="_blank">{{ link.url }}</a></td>
-            <td>{{ link.clicks }}</td>
+            <td>{{ link.title if link.title else '–' }}</td>
+            <td>{{ link.desc if link.desc else '–' }}</td>
+            <td>{{ link.id }}</td>
+            <td>
+              {% if link.popup %}
+                <span class="badge bg-primary">Yes</span>
+              {% else %}
+                <span class="badge bg-secondary">No</span>
+              {% endif %}
+            </td>
             <td>
               <a href="{{ url_for('edit', custom_id=link.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
               <form action="{{ url_for('delete', custom_id=link.id) }}" method="POST" class="d-inline">
@@ -36,29 +54,44 @@
       </table>
     </div>
 
+    <!-- Create / Edit Form -->
     <h3 class="mb-3">{{ edit_data and 'Edit Link' or 'Create New Link' }}</h3>
     <form action="{{ url_for('create') }}" method="POST">
       <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Destination URL</label>
+          <input type="url" name="url" value="{{ edit_data.url if edit_data }}" class="form-control" required>
+        </div>
         <div class="col-md-6">
           <label class="form-label">UTM Source</label>
           <input type="text" name="custom_id" value="{{ edit_data.custom_id if edit_data }}" class="form-control" required>
         </div>
         <div class="col-md-6">
-          <label class="form-label">Destination URL</label>
-          <input type="url" name="url" value="{{ edit_data.url if edit_data }}" class="form-control" required>
-        </div>
-        <div class="col-12">
           <label class="form-label">Title</label>
           <input type="text" name="title" value="{{ edit_data.title if edit_data }}" class="form-control">
         </div>
-        <div class="col-12">
+        <div class="col-md-6">
           <label class="form-label">Description</label>
-          <textarea name="description" class="form-control">{{ edit_data.desc if edit_data }}</textarea>
+          <textarea name="description" class="form-control" rows="2">{{ edit_data.desc if edit_data }}</textarea>
         </div>
         <div class="col-12">
           <label class="form-label">Popup HTML</label>
-          <textarea name="popup_text" class="form-control">{{ edit_data.popup if edit_data }}</textarea>
+          <textarea name="popup_text" class="form-control" rows="5">{{ edit_data.popup if edit_data }}</textarea>
         </div>
+
+        <!-- Link Analytics (only when editing) -->
+        {% if edit_data %}
+        <div class="col-12">
+          <h5>Analytics</h5>
+          <p><strong>Total Clicks:</strong> {{ edit_data.clicks }}</p>
+          <ul class="list-unstyled small">
+            {% for day, cnt in edit_data.log.items() %}
+              <li>{{ day }}: {{ cnt }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
         <div class="col-12 text-end">
           <button class="btn btn-success">{{ edit_data and 'Save Changes' or 'Create Link' }}</button>
         </div>
@@ -66,7 +99,17 @@
     </form>
   </div>
 
-  <script src="https://cdn.tiny.cloud/1/.../tinymce.min.js" referrerpolicy="origin"></script>
-  <script>tinymce.init({ selector:'textarea[name="popup_text"]', plugins:['link','image','lists'], toolbar:'bold italic | alignleft aligncenter alignright | bullist numlist | link image' });</script>
+  <!-- TinyMCE with your API key -->
+  <script src="https://cdn.tiny.cloud/1/9zoa256jx88gr3i2njll487m7bupp8ygbhyttgmc7rz4on6c/tinymce.min.js" referrerpolicy="origin"></script>
+  <script>
+    tinymce.init({
+      selector: 'textarea[name="popup_text"]',
+      plugins: ['link', 'image', 'lists', 'code'],
+      toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code',
+      menubar: false,
+      height: 300
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
