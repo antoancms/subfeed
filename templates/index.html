@@ -1,95 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Create or Edit Custom Share Link</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script src="https://cdn.tiny.cloud/1/9zoa256jx88gr3i2njll487m7bupp8ygbhyttgmc7rz4on6c/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-    <script>
-      tinymce.init({
-        selector: 'textarea[name="popup_text"]',
-        height: 250,
-        menubar: false,
-        plugins: 'link image code lists',
-        toolbar: 'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code',
-        branding: false
-      });
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My UTM Links – SubFeed</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Create or Edit a Custom Link Preview</h1>
-    <form action="/create" method="POST">
-        <input type="text" name="url" placeholder="Target URL" required value="{{ edit_data.url if edit_data else '' }}">
-        <input type="text" name="title" placeholder="Custom Title" required value="{{ edit_data.title if edit_data else '' }}">
-        <textarea name="description" placeholder="Custom Description" required>{{ edit_data.desc if edit_data else '' }}</textarea>
-        <input type="text" name="image" placeholder="Thumbnail Image URL" required value="{{ edit_data.image if edit_data else '' }}">
-        <input type="text" name="custom_id" placeholder="UTM Source (required)" required value="{{ edit_data.custom_id if edit_data else '' }}">
-        <textarea name="popup_text" placeholder="Paste HTML here to show inside popup (images, links, formatting allowed)">{{ (edit_data.popup | e) if edit_data and edit_data.popup else '' }}</textarea>
-        <button type="submit">Create or Update Link</button>
+<body class="bg-white">
+  <nav class="navbar navbar-light bg-light mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="#">SubFeed Admin</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h3 class="mb-3">Your Short Links</h3>
+    <div class="table-responsive mb-5">
+      <table class="table table-striped">
+        <thead><tr><th>UTM</th><th>URL</th><th>Clicks</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for link in links %}
+          <tr>
+            <td>{{ link.id }}</td>
+            <td><a href="{{ link.url }}" target="_blank">{{ link.url }}</a></td>
+            <td>{{ link.clicks }}</td>
+            <td>
+              <a href="{{ url_for('edit', custom_id=link.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+              <form action="{{ url_for('delete', custom_id=link.id) }}" method="POST" class="d-inline">
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="mb-3">{{ edit_data and 'Edit Link' or 'Create New Link' }}</h3>
+    <form action="{{ url_for('create') }}" method="POST">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">UTM Source</label>
+          <input type="text" name="custom_id" value="{{ edit_data.custom_id if edit_data }}" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Destination URL</label>
+          <input type="url" name="url" value="{{ edit_data.url if edit_data }}" class="form-control" required>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Title</label>
+          <input type="text" name="title" value="{{ edit_data.title if edit_data }}" class="form-control">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control">{{ edit_data.desc if edit_data }}</textarea>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Popup HTML</label>
+          <textarea name="popup_text" class="form-control">{{ edit_data.popup if edit_data }}</textarea>
+        </div>
+        <div class="col-12 text-end">
+          <button class="btn btn-success">{{ edit_data and 'Save Changes' or 'Create Link' }}</button>
+        </div>
+      </div>
     </form>
+  </div>
 
-    {% if links %}
-        <h2>🔗 Existing Links</h2>
-        <table border="1" cellpadding="10" cellspacing="0">
-            <tr>
-                <th>Title</th>
-                <th>Clicks</th>
-                <th>Short URL</th>
-                <th>Actions</th>
-            </tr>
-            {% for link in links %}
-            <tr>
-                <td>{{ link.title }}</td>
-                <td>{{ link.clicks }}</td>
-                <td><a href="/p/{{ link.id }}" target="_blank">/p/{{ link.id }}</a></td>
-                <td>
-                    <a href="/edit/{{ link.id }}">✏️ Edit</a>
-                    <form action="/delete/{{ link.id }}" method="POST" style="display:inline">
-                        <button type="submit" onclick="return confirm('Are you sure you want to delete this link?')">🗑️ Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-    {% endif %}
-
-    <script>
-    document.querySelector('form').addEventListener('submit', function (e) {
-      tinymce.triggerSave();
-      const content = document.querySelector('textarea[name="popup_text"]').value.trim();
-      if (!content) {
-        alert("Please fill out the popup text field.");
-        e.preventDefault();
-        return false;
-      }
-    });
-    </script>
-
-    <!-- Enhance Blogger popup behavior -->
-    <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const container = document.getElementById("popup-content");
-      if (!container) return;
-
-      const fullHtml = container.innerHTML.trim();
-      const textOnly = container.innerText || container.textContent || "";
-      const words = textOnly.split(/\s+/);
-
-      if (words.length > 100) {
-        const short = words.slice(0, 100).join(" ") + "... ";
-        container.innerHTML = `${short}<button id="read-more" style="color:blue;border:none;background:none;cursor:pointer;font-weight:bold;">Read more</button>`;
-        document.getElementById("read-more").onclick = () => {
-          container.innerHTML = fullHtml;
-        };
-      }
-
-      // Add event delegation for close button if present
-      const overlay = document.getElementById("popup-overlay");
-      const closeBtn = overlay?.querySelector("button");
-      if (closeBtn) {
-        closeBtn.onclick = () => overlay.remove();
-      }
-    });
-    </script>
+  <script src="https://cdn.tiny.cloud/1/.../tinymce.min.js" referrerpolicy="origin"></script>
+  <script>tinymce.init({ selector:'textarea[name="popup_text"]', plugins:['link','image','lists'], toolbar:'bold italic | alignleft aligncenter alignright | bullist numlist | link image' });</script>
 </body>
 </html>
