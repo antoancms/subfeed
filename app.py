@@ -1,9 +1,11 @@
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
+from flask_cors import CORS
 import json, uuid, os
 from datetime import datetime
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = 'your_secret_key_here'
+CORS(app)  # Enables cross-origin API access for Blogger
 
 data_file = 'data.json'
 if not os.path.exists(data_file):
@@ -44,20 +46,16 @@ def create():
     if not custom_id:
         return "❌ UTM Source is required.", 400
 
-    # Append or merge utm_source properly
-    url = request.form['url'].strip()
-    if url:
-        if 'utm_source=' not in url:
-            url += ('&' if '?' in url else '?') + f"utm_source={custom_id}"
-    else:
-        url = data.get(custom_id, {}).get("url", "")
+    target_url = request.form['url']
+    if '?utm_source=' not in target_url:
+        target_url += f"?utm_source={custom_id}"
 
     data[custom_id] = {
-        "url": url,
-        "title": request.form['title'] or data.get(custom_id, {}).get("title", ""),
-        "desc": request.form['description'] or data.get(custom_id, {}).get("desc", ""),
-        "image": request.form['image'] or data.get(custom_id, {}).get("image", ""),
-        "popup": request.form['popup_text'] or data.get(custom_id, {}).get("popup", ""),
+        "url": target_url,
+        "title": request.form['title'],
+        "desc": request.form['description'],
+        "image": request.form['image'],
+        "popup": request.form['popup_text'],
         "clicks": data.get(custom_id, {}).get("clicks", 0),
         "log": data.get(custom_id, {}).get("log", {})
     }
