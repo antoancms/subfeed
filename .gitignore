@@ -1,2 +1,37 @@
-# Allow tracking of runtime data
-data.json
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environment
+venv/
+ENV/
+env/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Runtime data (track data.json in repo!)
+# data.json  <-- do NOT ignore, we ARE tracking data.json
+
+data_template.json
+
+# Logs
+*.log
+
+# Secrets (should be in env vars)
+*.pem
+
+# Editor swap files
+*.swp
