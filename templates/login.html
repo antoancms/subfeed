@@ -3,127 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SubFeed Publisher Platform</title>
+  <title>SubFeed Publisher Login</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    /* Custom accent colors */
-    .feature-icon { font-size: 2rem; color: #0d6efd; }
-    .bg-hero { background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%); }
-  </style>
 </head>
 <body>
-
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container">
       <a class="navbar-brand fw-bold" href="#">SubFeed</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-              data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navMenu">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="#hero">Home</a></li>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
-          <li class="nav-item"><a class="nav-link" href="#benefits">Admin Benefits</a></li>
+          <li class="nav-item"><a class="nav-link" href="#benefits">Benefits</a></li>
+          <li class="nav-item"><a class="nav-link active" href="#login">Login</a></li>
         </ul>
-        <a class="btn btn-primary" href="#login">Login</a>
       </div>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section id="hero" class="bg-hero text-white text-center py-5">
-    <div class="container">
-      <h1 class="display-4 fw-bold">Next-Level UTM & Popup Management</h1>
-      <p class="lead mb-4">Seamlessly create trackable UTM short-links, design rich HTML pop-ups, and monitor real-time performance—all in one place.</p>
-      <a href="#login" class="btn btn-light btn-lg">Get Started</a>
-    </div>
-  </section>
-
-  <!-- Script Features -->
-  <section id="features" class="container py-5">
-    <h2 class="mb-4 text-center">Script Features</h2>
-    <div class="row g-4">
-      <div class="col-md-6">
-        <div class="d-flex">
-          <div class="feature-icon me-3">🔧</div>
-          <div>
-            <h5>Dynamic Content</h5>
-            <p>Change title, image, and destination URL for any existing link without breaking your shared URLs.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="d-flex">
-          <div class="feature-icon me-3">💬</div>
-          <div>
-            <h5>Targeted Pop-Ups</h5>
-            <p>Serve custom HTML pop-ups on specific UTM codes only—bots and untargeted visits never see them.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="d-flex">
-          <div class="feature-icon me-3">🔄</div>
-          <div>
-            <h5>Non-Destructive Edits</h5>
-            <p>Update URL, title or description without losing the original UTM link or stats you’ve already shared.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="d-flex">
-          <div class="feature-icon me-3">📊</div>
-          <div>
-            <h5>Real-Time Tracking</h5>
-            <p>See how many visitors each targeted link receives—daily logs and total counts persist forever.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Admin Benefits -->
-  <section id="benefits" class="bg-light py-5">
-    <div class="container">
-      <h2 class="mb-4 text-center">Admin Benefits</h2>
+  <!-- Testimonials -->
+  <section id="testimonials" class="bg-light py-5">
+    <div class="container text-center">
+      <h4 class="mb-4">What Our Admins Say</h4>
       <div class="row g-4">
-        <div class="col-md-6">
-          <div class="d-flex">
-            <div class="feature-icon me-3">💰</div>
-            <div>
-              <h5>High-RPM Threads</h5>
-              <p>Attract and load high-paying ad threads in pop-ups while delivering the correct Facebook article in the background.</p>
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <p class="card-text fst-italic">“We achieved a <strong>200% ROI</strong> in just one week!”</p>
+              <footer class="blockquote-footer">Admin A</footer>
             </div>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="d-flex">
-            <div class="feature-icon me-3">🤖</div>
-            <div>
-              <h5>Bot Protection</h5>
-              <p>Pop-ups only appear on UTM links—automated bots or untargeted visitors never trigger your ad strategy.</p>
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <p class="card-text fst-italic">“Our AdSense revenue <strong>doubled</strong> within days!”</p>
+              <footer class="blockquote-footer">Admin B</footer>
             </div>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="d-flex">
-            <div class="feature-icon me-3">🚀</div>
-            <div>
-              <h5>First-Impression Load</h5>
-              <p>The pop-up fires on the very first page impression—refreshes won’t re-trigger it, ensuring a seamless user experience.</p>
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <p class="card-text fst-italic">“Fast results: <strong>24h</strong> to see impact!”</p>
+              <footer class="blockquote-footer">Admin C</footer>
             </div>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="d-flex">
-            <div class="feature-icon me-3">⚙️</div>
-            <div>
-              <h5>Full Control</h5>
-              <p>One dashboard to manage all links, pop-ups, and analytics—no more scattered scripts or manual tracking.</p>
-            </div>
-          </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Metrics -->
+  <section id="stats" class="text-white bg-dark py-5">
+    <div class="container">
+      <div class="row text-center">
+        <div class="col-md-6 mb-3">
+          <h2 class="display-5">200M+</h2>
+          <p class="mb-0">Fans Collected</p>
+        </div>
+        <div class="col-md-6 mb-3">
+          <h2 class="display-5">50M+</h2>
+          <p class="mb-0">Monthly Visitors Attracted</p>
         </div>
       </div>
     </div>
@@ -147,7 +92,7 @@
     </div>
   </section>
 
-  <!-- Static Footer -->
+  <!-- Footer -->
   <footer class="text-center py-3 bg-white">
     <small>© SubFeed. All rights reserved.</small>
   </footer>
