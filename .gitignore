@@ -1,8 +1,2 @@
-# Ignore OS and IDE files
-__pycache__/
-*.pyc
-
-# Keep data.json tracked for persistence
+# Allow tracking of runtime data
 data.json
-
-# data_template.json remains as a template
