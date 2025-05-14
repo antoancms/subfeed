@@ -3,18 +3,20 @@ from flask_cors import CORS
 import os
 import json
 import shutil
+import logging
 from datetime import datetime
-from github import Github  # PyGithub client
+from github import Github, GithubException
 
 # Configuration
-REPO_NAME  = 'antoancms/subfeed'
-APP_BRANCH = 'main'
-TOKEN_ENV  = 'GITHUB_TOKEN'  # Read from environment, not hard-coded
+REPO_NAME   = 'antoancms/subfeed'
+APP_BRANCH  = 'main'
+TOKEN_ENV   = 'GITHUB_TOKEN'
 PASSWORD    = '8855'
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = 'your_secret_key_here'
 CORS(app)
+app.logger.setLevel(logging.INFO)
 
 # Data file paths
 base_dir      = app.root_path
@@ -29,20 +31,34 @@ if not os.path.exists(data_file):
         with open(data_file, 'w') as f:
             json.dump({}, f)
 
-# GitHub commit helper
+# GitHub commit helper with logging
 def commit_data_json(msg="Auto-update data.json"):
     token = os.environ.get(TOKEN_ENV)
     if not token:
+        app.logger.error("commit_data_json: GITHUB_TOKEN is not set in environment")
         return
-    gh = Github(token)
-    repo = gh.get_repo(REPO_NAME)
-    path = 'data.json'
+    try:
+        gh   = Github(token)
+        repo = gh.get_repo(REPO_NAME)
+    except Exception as e:
+        app.logger.error(f"commit_data_json: Could not connect to GitHub: {e}")
+        return
+
+    path    = 'data.json'
     content = open(data_file, 'r').read()
+
     try:
         file = repo.get_contents(path, ref=APP_BRANCH)
         repo.update_file(path, msg, content, file.sha, branch=APP_BRANCH)
-    except Exception:
-        repo.create_file(path, msg, content, branch=APP_BRANCH)
+        app.logger.info("commit_data_json: Successfully updated data.json on GitHub")
+    except GithubException as e:
+        if e.status == 404:
+            repo.create_file(path, msg, content, branch=APP_BRANCH)
+            app.logger.info("commit_data_json: data.json not found on GitHub — created new file")
+        else:
+            app.logger.error(f"commit_data_json: GitHubException {e.status} {e.data}")
+    except Exception as e:
+        app.logger.error(f"commit_data_json: Unexpected error when updating file: {e}")
 
 # Save helper
 def save_data(data):
@@ -68,14 +84,14 @@ def home():
     links_all = [{
         'id': u,
         'url': info.get('url'),
-        'title': info.get('title', ''),
-        'desc': info.get('desc', ''),
-        'popup': bool(info.get('popup', '')),
-        'clicks': info.get('clicks', 0),
-        'log': info.get('log', {})
+        'title': info.get('title',''),
+        'desc': info.get('desc',''),
+        'popup': bool(info.get('popup','')),
+        'clicks': info.get('clicks',0),
+        'log': info.get('log',{})
     } for u, info in data.items()]
 
-    total_links = len(links_all)
+    total_links  = len(links_all)
     total_clicks = sum(item['clicks'] for item in links_all)
 
     per_page = request.args.get('per_page', 10, type=int)
@@ -103,7 +119,7 @@ def create():
         return redirect(url_for('home'))
     with open(data_file, 'r') as f:
         data = json.load(f)
-    custom_id = request.form.get('custom_id', '').strip()
+    custom_id = request.form.get('custom_id','').strip()
     if not custom_id:
         return "UTM Source is required", 400
     target = request.form['url']
@@ -111,12 +127,12 @@ def create():
         target += f"?utm_source={custom_id}"
     prev = data.get(custom_id, {})
     data[custom_id] = {
-        'url': target,
-        'title': request.form.get('title', ''),
-        'desc': request.form.get('description', ''),
-        'popup': request.form.get('popup_text', ''),
-        'clicks': prev.get('clicks', 0),
-        'log': prev.get('log', {})
+        'url':   target,
+        'title': request.form.get('title',''),
+        'desc':  request.form.get('description',''),
+        'popup': request.form.get('popup_text',''),
+        'clicks': prev.get('clicks',0),
+        'log':    prev.get('log',{})
     }
     save_data(data)
     full_url = request.url_root.rstrip('/') + url_for('preview', id=custom_id)
@@ -157,10 +173,10 @@ def preview(id):
         data = json.load(f)
     if id in data:
         info = data[id]
-        info['clicks'] = info.get('clicks', 0) + 1
+        info['clicks'] = info.get('clicks',0) + 1
         today = datetime.now().strftime('%Y-%m-%d')
-        log = info.get('log', {})
-        log[today] = log.get(today, 0) + 1
+        log = info.get('log',{})
+        log[today] = log.get(today,0) + 1
         info['log'] = log
         data[id] = info
         save_data(data)
@@ -171,7 +187,7 @@ def preview(id):
 def get_popup_text(utm):
     with open(data_file, 'r') as f:
         data = json.load(f)
-    return jsonify({ 'text': data.get(utm, {}).get('popup', '') })
+    return jsonify({'text': data.get(utm, {}).get('popup','')})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
