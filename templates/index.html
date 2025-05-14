@@ -2,143 +2,84 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>My UTM Links – SubFeed</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-white">
-  <!-- Navbar -->
   <nav class="navbar navbar-light bg-light mb-4">
-    <div class="container">
-      <a class="navbar-brand" href="#">SubFeed Admin</a>
-    </div>
+    <div class="container"><a class="navbar-brand" href="#">SubFeed Admin</a></div>
   </nav>
 
   <div class="container">
-    <!-- Overview Analytics -->
-    <div class="mb-4">
-      <h5>Overview Analytics</h5>
-      <p><strong>Total Links:</strong> {{ total_links }}</p>
-      <p><strong>Total Clicks:</strong> {{ total_clicks }}</p>
-    </div>
-
-    <!-- Create / Edit Form -->
-    <h3 class="mb-3">{{ edit_data and 'Edit Link' or 'Create New Link' }}</h3>
-    <form action="{{ url_for('create') }}" method="POST">
+    <h3>{{ edit_data ? 'Edit Link' : 'Create New Link' }}</h3>
+    <form action="{% if edit_data %}{{ url_for('edit',custom_id=edit_data.custom_id) }}{% else %}{{ url_for('create') }}{% endif %}" method="POST">
       <div class="mb-3">
-        <label class="form-label">Destination URL</label>
+        <label>Destination URL</label>
         <input type="url" name="url" value="{{ edit_data.url if edit_data }}" class="form-control" required>
       </div>
       <div class="mb-3">
-        <label class="form-label">Title</label>
+        <label>Title</label>
         <input type="text" name="title" value="{{ edit_data.title if edit_data }}" class="form-control">
       </div>
       <div class="mb-3">
-        <label class="form-label">Description</label>
-        <textarea name="description" class="form-control" rows="2">{{ edit_data.desc if edit_data }}</textarea>
+        <label>Description</label>
+        <textarea name="description" class="form-control">{{ edit_data.desc if edit_data }}</textarea>
       </div>
       <div class="mb-3">
-        <label class="form-label">UTM Source</label>
+        <label>UTM Source</label>
         <input type="text" name="custom_id" value="{{ edit_data.custom_id if edit_data }}" class="form-control" required>
       </div>
       <div class="mb-3">
-        <label class="form-label">Popup HTML</label>
-        <textarea id="popup_text" name="popup_text" class="form-control" rows="5">{{ edit_data.popup if edit_data }}</textarea>
+        <label>Popup HTML</label>
+        <textarea id="popup_text" name="popup_text" class="form-control">{{ edit_data.popup if edit_data }}</textarea>
       </div>
 
       {% if edit_data %}
-      <div class="mb-4">
-        <a href="{{ url_for('create') }}" class="btn btn-outline-secondary mb-3">New Link</a>
-        <h5>Link Analytics</h5>
-        <p><strong>Total Clicks:</strong> {{ edit_data.clicks }}</p>
-        <ul class="list-unstyled small">
-          {% for day, cnt in edit_data.log.items() %}
-            <li>{{ day }}: {{ cnt }}</li>
-          {% endfor %}
-        </ul>
+      <div class="mb-3">
+        <button class="btn btn-success">Save Changes</button>
+      </div>
+      {% else %}
+      <div class="mb-3">
+        <button class="btn btn-primary">Create Link</button>
       </div>
       {% endif %}
-
-      <div class="text-end mb-5">
-        <button class="btn btn-success">{{ edit_data and 'Save Changes' or 'Create Link' }}</button>
-      </div>
     </form>
 
-    <!-- Pagination Controls -->
-    <div class="row align-items-center mb-4">
-      <div class="col-auto">
-        <label for="perPageSelect" class="form-label">Show</label>
-        <select id="perPageSelect" class="form-select" onchange="updatePerPage()">
-          <option value="10"{% raw %}{% if per_page==10 %} selected{% endif %}{% endraw %}>10</option>
-          <option value="50"{% raw %}{% if per_page==50 %} selected{% endif %}{% endraw %}>50</option>
-          <option value="100"{% raw %}{% if per_page==100 %} selected{% endif %}{% endraw %}>100</option>
-          <option value="500"{% raw %}{% if per_page==500 %} selected{% endif %}{% endraw %}>500</option>
-        </select>
-      </div>
-      <div class="col-auto">entries</div>
-    </div>
-
-    <!-- Links Table -->
     <h3>Your Short Links</h3>
-    <div class="table-responsive mb-3">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Destination URL</th>
-            <th>Title</th>
-            <th>Description</th>
-            <th>UTM Source</th>
-            <th>Popup?</th>
-            <th>Clicks</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for link in links %}
-          <tr>
-            <td><a href="{{ link.url }}" target="_blank">{{ link.url }}</a></td>
-            <td>{{ link.title or '–' }}</td>
-            <td>{{ link.desc or '–' }}</td>
-            <td>{{ link.id }}</td>
-            <td>{% if link.popup %}<span class="badge bg-primary">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</td>
-            <td>{{ link.clicks }}</td>
-            <td>
-              <a href="{{ url_for('edit', custom_id=link.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-              <form action="{{ url_for('delete', custom_id=link.id) }}" method="POST" class="d-inline">
-                <button class="btn btn-sm btn-outline-danger">Delete</button>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <nav aria-label="Page navigation">
-      <ul class="pagination">
-        {% for p in range(1, total_pages+1) %}
-        <li class="page-item{% raw %}{% if p==page %} active{% endif %}{% endraw %}"><a class="page-link" href="{{ url_for('home') }}?page={{ p }}&per_page={{ per_page }}">{{ p }}</a></li>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Destination URL</th>
+          <th>Title</th>
+          <th>Description</th>
+          <th>UTM Source</th>
+          <th>Popup?</th>
+          <th>Clicks</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for link in links %}
+        <tr>
+          <td><a href="{{ link.url }}" target="_blank">{{ link.url }}</a></td>
+          <td>{{ link.title or '–' }}</td>
+          <td>{{ link.desc or '–' }}</td>
+          <td>{{ link.id }}</td>
+          <td>{% if link.popup %}Yes{% else %}No{% endif %}</td>
+          <td>{{ link.clicks }}</td>
+          <td>
+            <a href="{{ url_for('edit',custom_id=link.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            <form method="POST" action="{{ url_for('delete',custom_id=link.id) }}" style="display:inline;">
+              <button class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
         {% endfor %}
-      </ul>
-    </nav>
+      </tbody>
+    </table>
   </div>
 
-  <!-- TinyMCE -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.tiny.cloud/1/9zoa256jx88gr3i2njll487m7bupp8ygbhyttgmc7rz4on6c/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-  <script>
-    tinymce.init({
-      selector: '#popup_text',
-      plugins: ['link','image','lists','code'],
-      toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code',
-      menubar: false,
-      height: 300
-    });
-    function updatePerPage() {
-      const per = document.getElementById('perPageSelect').value;
-      window.location.href = `{{ url_for('home') }}?page=1&per_page=${per}`;
-    }
-  </script>
 </body>
 </html>
