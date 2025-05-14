@@ -1,74 +1,56 @@
-<!-- templates/result.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Link Created</title>
-    <style>
-        body {
-            background: #f8f9fa;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 60px 20px;
-        }
-        .card {
-            background: #fff;
-            padding: 30px;
-            max-width: 600px;
-            margin: auto;
-            border-radius: 10px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            margin-top: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button, a.share-btn {
-            display: inline-block;
-            background: #007BFF;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            margin: 10px 5px 0;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        a.share-btn.facebook { background: #4267B2; }
-        a.share-btn.twitter  { background: #1DA1F2; }
-        a.share-btn.whatsapp { background: #25D366; }
-        button:hover, a.share-btn:hover {
-            opacity: 0.9;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Link Created – SubFeed</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="card">
-        <h2>✅ Your Link Has Been Created!</h2>
-        <input type="text" id="preview-url" value="{{ full_url }}" readonly>
-        <br>
-        <button onclick="copyLink()">📋 Copy Link</button>
+<body class="bg-white">
+  <div class="container py-5 text-center">
+    <h3 class="mb-4">✅ Your Link Has Been Created!</h3>
+    <!-- Generated Link Input -->
+    <input id="generatedLink" type="text" class="form-control text-center mb-3" value="{{ full_url }}" readonly>
 
-        <div style="margin-top: 20px;">
-            <a class="share-btn facebook" href="https://www.facebook.com/sharer/sharer.php?u={{ full_url }}" target="_blank">🔵 Share on Facebook</a>
-            <a class="share-btn twitter" href="https://twitter.com/intent/tweet?url={{ full_url }}" target="_blank">🐦 Tweet</a>
-            <a class="share-btn whatsapp" href="https://api.whatsapp.com/send?text={{ full_url }}" target="_blank">🟢 WhatsApp</a>
-        </div>
+    <!-- Action Buttons -->
+    <div class="mb-4">
+      <button id="copyBtn" class="btn btn-primary me-2">Copy Link</button>
+      <a href="{{ url_for('create') }}" class="btn btn-secondary">New Link</a>
     </div>
 
-    <script>
-        function copyLink() {
-            const input = document.getElementById("preview-url");
-            input.select();
-            input.setSelectionRange(0, 99999);
-            document.execCommand("copy");
-            alert("✅ Link copied: " + input.value);
-        }
-    </script>
+    <!-- Optional Social Shares (uncomment if needed) -->
+    <!--
+    <div class="mt-3">
+      <a href="https://www.facebook.com/sharer/sharer.php?u={{ full_url }}" target="_blank" class="btn btn-outline-primary me-2">Share on Facebook</a>
+      <a href="https://twitter.com/intent/tweet?url={{ full_url }}" target="_blank" class="btn btn-outline-info me-2">Tweet</a>
+      <a href="https://wa.me/?text={{ full_url }}" target="_blank" class="btn btn-outline-success">WhatsApp</a>
+    </div>
+    -->
+  </div>
+
+  <!-- Copy-to-Clipboard & Auto-Select Script -->
+  <script>
+    // Auto-select the link on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('generatedLink');
+      input.focus();
+      input.select();
+    });
+
+    // Copy to clipboard without alert
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      const link = document.getElementById('generatedLink').value;
+      try {
+        await navigator.clipboard.writeText(link);
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy Link', 2000);
+      } catch (err) {
+        console.error('Copy failed', err);
+      }
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
