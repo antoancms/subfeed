@@ -23,7 +23,7 @@
     <form action="{% if edit_data %}{{ url_for('edit', custom_id=edit_data.custom_id) }}{% else %}{{ url_for('create') }}{% endif %}" method="POST">
       <div class="mb-3">
         <label class="form-label">Destination URL</label>
-        <input type="url" name="url" value="{{ edit_data.url if edit_data }}" class="form-control" required>
+        <input type="url" name="url" value="{% if edit_data %}{{ edit_data.url.split('?')[0] }}{% endif %}" class="form-control" required> class="form-control" required>
       </div>
       <div class="mb-3">
         <label class="form-label">Title</label>
