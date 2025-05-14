@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My UTM Links – SubFeed</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -12,74 +12,93 @@
   </nav>
 
   <div class="container">
-    <h3>{{ edit_data ? 'Edit Link' : 'Create New Link' }}</h3>
-    <form action="{% if edit_data %}{{ url_for('edit',custom_id=edit_data.custom_id) }}{% else %}{{ url_for('create') }}{% endif %}" method="POST">
+    <!-- Create / Edit Form -->
+    <h3 class="mb-3">
+      {% if edit_data %}
+        Edit Link
+      {% else %}
+        Create New Link
+      {% endif %}
+    </h3>
+    <form action="{% if edit_data %}{{ url_for('edit', custom_id=edit_data.custom_id) }}{% else %}{{ url_for('create') }}{% endif %}" method="POST">
       <div class="mb-3">
-        <label>Destination URL</label>
+        <label class="form-label">Destination URL</label>
         <input type="url" name="url" value="{{ edit_data.url if edit_data }}" class="form-control" required>
       </div>
       <div class="mb-3">
-        <label>Title</label>
+        <label class="form-label">Title</label>
         <input type="text" name="title" value="{{ edit_data.title if edit_data }}" class="form-control">
       </div>
       <div class="mb-3">
-        <label>Description</label>
-        <textarea name="description" class="form-control">{{ edit_data.desc if edit_data }}</textarea>
+        <label class="form-label">Description</label>
+        <textarea name="description" class="form-control" rows="2">{{ edit_data.desc if edit_data }}</textarea>
       </div>
       <div class="mb-3">
-        <label>UTM Source</label>
+        <label class="form-label">UTM Source</label>
         <input type="text" name="custom_id" value="{{ edit_data.custom_id if edit_data }}" class="form-control" required>
       </div>
       <div class="mb-3">
-        <label>Popup HTML</label>
-        <textarea id="popup_text" name="popup_text" class="form-control">{{ edit_data.popup if edit_data }}</textarea>
+        <label class="form-label">Popup HTML</label>
+        <textarea id="popup_text" name="popup_text" class="form-control" rows="5">{{ edit_data.popup if edit_data }}</textarea>
       </div>
 
-      {% if edit_data %}
-      <div class="mb-3">
-        <button class="btn btn-success">Save Changes</button>
+      <div class="text-end mb-5">
+        <button class="btn btn-success">
+          {% if edit_data %}Save Changes{% else %}Create Link{% endif %}
+        </button>
       </div>
-      {% else %}
-      <div class="mb-3">
-        <button class="btn btn-primary">Create Link</button>
-      </div>
-      {% endif %}
     </form>
 
+    <!-- Links Table -->
     <h3>Your Short Links</h3>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Destination URL</th>
-          <th>Title</th>
-          <th>Description</th>
-          <th>UTM Source</th>
-          <th>Popup?</th>
-          <th>Clicks</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for link in links %}
-        <tr>
-          <td><a href="{{ link.url }}" target="_blank">{{ link.url }}</a></td>
-          <td>{{ link.title or '–' }}</td>
-          <td>{{ link.desc or '–' }}</td>
-          <td>{{ link.id }}</td>
-          <td>{% if link.popup %}Yes{% else %}No{% endif %}</td>
-          <td>{{ link.clicks }}</td>
-          <td>
-            <a href="{{ url_for('edit',custom_id=link.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-            <form method="POST" action="{{ url_for('delete',custom_id=link.id) }}" style="display:inline;">
-              <button class="btn btn-sm btn-outline-danger">Delete</button>
-            </form>
-          </td>
-        </tr>
+    <div class="table-responsive mb-3">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Destination URL</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>UTM Source</th>
+            <th>Popup?</th>
+            <th>Clicks</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for link in links %}
+          <tr>
+            <td><a href="{{ link.url }}" target="_blank">{{ link.url }}</a></td>
+            <td>{{ link.title or '–' }}</td>
+            <td>{{ link.desc or '–' }}</td>
+            <td>{{ link.id }}</td>
+            <td>{% if link.popup %}<span class="badge bg-primary">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</td>
+            <td>{{ link.clicks }}</td>
+            <td>
+              <a href="{{ url_for('edit', custom_id=link.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+              <form action="{{ url_for('delete', custom_id=link.id) }}" method="POST" class="d-inline">
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        {% for p in range(1, total_pages+1) %}
+        <li class="page-item {% if p == page %}active{% endif %}"><a class="page-link" href="{{ url_for('home') }}?page={{ p }}&per_page={{ per_page }}">{{ p }}</a></li>
         {% endfor %}
-      </tbody>
-    </table>
+      </ul>
+    </nav>
   </div>
 
+  <script src="https://cdn.tiny.cloud/1/9zoa256jx88gr3i2njll487m7bupp8ygbhyttgmc7rz4on6c/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+  <script>
+    tinymce.init({ selector: '#popup_text', plugins: ['link','image','lists','code'], toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code', menubar: false, height:300 });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
