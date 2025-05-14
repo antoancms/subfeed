@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from flask_cors import CORS
-import json, uuid, os, shutil
+import json, os, shutil
 from datetime import datetime
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -8,8 +8,9 @@ app.secret_key = 'your_secret_key_here'
 CORS(app)  # Enables cross-origin API access for Blogger
 
 # Use a template on first run, then persist data.json
-data_file     = os.path.join(app.root_path, 'data.json')
-template_file = os.path.join(app.root_path, 'data_template.json')
+base_dir     = app.root_path
+data_file     = os.path.join(base_dir, 'data.json')
+template_file = os.path.join(base_dir, 'data_template.json')
 if not os.path.exists(data_file):
     if os.path.exists(template_file):
         shutil.copyfile(template_file, data_file)
@@ -32,16 +33,32 @@ def index():
 def home():
     if not session.get('authenticated'):
         return redirect(url_for('index'))
+    # Load data
     with open(data_file, 'r') as f:
         data = json.load(f)
+    # Build link records
     links = []
     for utm, info in data.items():
         links.append({
             'id': utm,
             'url': info.get('url'),
-            'clicks': info.get('clicks', 0)
+            'title': info.get('title',''),
+            'desc': info.get('desc',''),
+            'popup': bool(info.get('popup','')),
+            'clicks': info.get('clicks', 0),
+            'log': info.get('log', {})
         })
-    return render_template('index.html', links=links)
+    # Pagination parameters
+    per_page = request.args.get('per_page', default=10, type=int)
+    if per_page not in [10, 50, 100, 500]:
+        per_page = 10
+    page = request.args.get('page', default=1, type=int)
+    total = len(links)
+    total_pages = (total + per_page - 1) // per_page
+    start = (page - 1) * per_page
+    end = start + per_page
+    links_page = links[start:end]
+    return render_template('index.html', links=links_page, page=page, per_page=per_page, total_pages=total_pages, edit_data=None)
 
 @app.route('/create', methods=['POST'])
 def create():
@@ -50,7 +67,7 @@ def create():
     with open(data_file, 'r') as f:
         data = json.load(f)
 
-    custom_id = request.form.get('custom_id','').strip()
+    custom_id = request.form.get('custom_id', '').strip()
     if not custom_id:
         return "❌ UTM Source is required.", 400
 
@@ -80,16 +97,38 @@ def create():
 def edit(custom_id):
     if not session.get('authenticated'):
         return redirect(url_for('index'))
+    # Load and validate record
     with open(data_file, 'r') as f:
         data = json.load(f)
     if custom_id not in data:
         return "❌ Link not found.", 404
-    # Pass existing record into form
     record = data[custom_id]
-    return render_template('index.html', edit_data={
-        'custom_id': custom_id,
-        **record
-    })
+    # Prepare links with same pagination defaults
+    links = []
+    for utm, info in data.items():
+        links.append({
+            'id': utm,
+            'url': info.get('url'),
+            'title': info.get('title',''),
+            'desc': info.get('desc',''),
+            'popup': bool(info.get('popup','')),
+            'clicks': info.get('clicks', 0),
+            'log': info.get('log', {})
+        })
+    per_page, page = 10, 1
+    total = len(links)
+    total_pages = (total + per_page - 1) // per_page
+    links_page = links[0:per_page]
+    return render_template('index.html', links=links_page, page=page, per_page=per_page, total_pages=total_pages,
+                           edit_data={
+                               'custom_id': custom_id,
+                               'url': record.get('url',''),
+                               'title': record.get('title',''),
+                               'desc': record.get('desc',''),
+                               'popup': record.get('popup',''),
+                               'clicks': record.get('clicks',0),
+                               'log': record.get('log',{})
+                           })
 
 @app.route('/delete/<custom_id>', methods=['POST'])
 def delete(custom_id):
@@ -108,7 +147,6 @@ def preview(id):
     with open(data_file, 'r') as f:
         data = json.load(f)
     if id in data:
-        # update stats
         data[id]['clicks'] = data[id].get('clicks', 0) + 1
         today = datetime.now().strftime('%Y-%m-%d')
         log = data[id].get('log', {})
