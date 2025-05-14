@@ -1,3 +1,8 @@
-git add .gitignore data.json
-git commit -m "Track data.json for persistent link data"
-git push
+# Ignore OS and IDE files
+__pycache__/
+*.pyc
+
+# Keep data.json tracked for persistence
+data.json
+
+# data_template.json remains as a template
