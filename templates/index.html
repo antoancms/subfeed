@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>My UTM Links – SubFeed</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -12,6 +12,13 @@
   </nav>
 
   <div class="container">
+    <!-- Overview Analytics -->
+    <div class="mb-4">
+      <h5>Overview Analytics</h5>
+      <p><strong>Total Links:</strong> {{ total_links }}</p>
+      <p><strong>Total Clicks:</strong> {{ total_clicks }}</p>
+    </div>
+
     <!-- Create / Edit Form -->
     <h3 class="mb-3">
       {% if edit_data %}
@@ -23,7 +30,7 @@
     <form action="{% if edit_data %}{{ url_for('edit', custom_id=edit_data.custom_id) }}{% else %}{{ url_for('create') }}{% endif %}" method="POST">
       <div class="mb-3">
         <label class="form-label">Destination URL</label>
-        <input type="url" name="url" value="{% if edit_data %}{{ edit_data.url.split('?')[0] }}{% endif %}" class="form-control" required> class="form-control" required>
+        <input type="url" name="url" value="{% if edit_data %}{{ edit_data.url.split('?')[0] }}{% endif %}" class="form-control" required>
       </div>
       <div class="mb-3">
         <label class="form-label">Title</label>
@@ -102,3 +109,4 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+```
