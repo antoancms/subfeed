@@ -1,2 +1,3 @@
-# runtime data (do not commit)
-data.json
+git add .gitignore data.json
+git commit -m "Track data.json for persistent link data"
+git push
