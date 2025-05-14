@@ -9,7 +9,7 @@ from github import Github  # PyGithub client
 # Configuration
 REPO_NAME  = 'antoancms/subfeed'
 APP_BRANCH = 'main'
-TOKEN_ENV  = 'GITHUB_TOKEN'
+TOKEN_ENV  = 'GITHUB_TOKEN'  # Read from environment, not hard-coded
 PASSWORD    = '8855'
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -153,9 +153,6 @@ def delete(custom_id):
 
 @app.route('/p/<id>')
 def preview(id):
-    if not session.get('authenticated'):
-        # No auth required for preview
-        pass
     with open(data_file, 'r') as f:
         data = json.load(f)
     if id in data:
