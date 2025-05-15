@@ -11,7 +11,7 @@
   <!-- Navbar -->
   <nav class="navbar navbar-light bg-light mb-4">
     <div class="container">
-      <a class="navbar-brand" href="#">SubFeed Admin</a>
+      <a class="navbar-brand" href="{{ url_for('index') }}">SubFeed Admin</a>
     </div>
   </nav>
 
@@ -25,7 +25,12 @@
     </div>
 
     <!-- Create/Edit Form -->
-    <h3 class="mb-3">{% if edit_data %}Edit Link{% else %}Create New Link{% endif %}</h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="m-0">{% if edit_data %}Edit Link{% else %}Create New Link{% endif %}</h3>
+      {% if edit_data %}
+        <a href="{{ url_for('create') }}" class="btn btn-outline-secondary">New Link</a>
+      {% endif %}
+    </div>
     <form
       action="{% if edit_data %}{{ url_for('edit', custom_id=edit_data.custom_id) }}{% else %}{{ url_for('create') }}{% endif %}"
       method="POST"
@@ -60,7 +65,6 @@
         >{{ edit_data.desc if edit_data }}</textarea>
       </div>
 
-      <!-- Thumbnail URL -->
       <div class="mb-3">
         <label class="form-label">Thumbnail URL</label>
         <input
@@ -68,7 +72,7 @@
           name="image"
           value="{{ edit_data.image if edit_data }}"
           class="form-control"
-          placeholder="https://example.com/thumb.jpg"
+          placeholder="https://example.com/thumb.png"
         >
       </div>
 
@@ -93,7 +97,7 @@
         >{{ edit_data.popup if edit_data }}</textarea>
       </div>
 
-      <div class="mb-4">
+      <div class="d-flex justify-content-end mb-5 gap-2">
         <button class="btn {% if edit_data %}btn-success{% else %}btn-primary{% endif %}">
           {% if edit_data %}Save Changes{% else %}Create Link{% endif %}
         </button>
