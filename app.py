@@ -1,4 +1,3 @@
-```python
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from flask_cors import CORS
 import os, json, base64
@@ -175,4 +174,3 @@ def popup(utm):
 
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT',5000)))
-```
