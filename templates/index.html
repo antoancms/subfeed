@@ -37,6 +37,13 @@
         <label class="form-label">Description</label>
         <textarea name="description" class="form-control" rows="2">{{ edit_data.desc if edit_data }}</textarea>
       </div>
+
+      <!-- NEW Thumbnail URL field -->
+      <div class="mb-3">
+        <label class="form-label">Thumbnail URL</label>
+        <input type="text" name="image" value="{{ edit_data.image if edit_data }}" class="form-control" placeholder="https://example.com/thumb.jpg">
+      </div>
+
       <div class="mb-3">
         <label class="form-label">UTM Source</label>
         <input type="text" name="custom_id" value="{{ edit_data.custom_id if edit_data }}" class="form-control" required>
@@ -46,123 +53,9 @@
         <textarea id="popup_text" name="popup_text" class="form-control" rows="5">{{ edit_data.popup if edit_data }}</textarea>
       </div>
 
-      {% if edit_data %}
       <div class="mb-4">
-        <button class="btn btn-success">Save Changes</button>
+        <button class="btn {% if edit_data %}btn-success{% else %}btn-primary{% endif %}">
+          {% if edit_data %}Save Changes{% else %}Create Link{% endif %}
+        </button>
       </div>
-      {% else %}
-      <div class="mb-4">
-        <button class="btn btn-primary">Create Link</button>
-      </div>
-      {% endif %}
     </form>
-
-    <!-- Pagination Controls -->
-    <div class="row mb-2">
-      <div class="col-auto">
-        <label for="perPageSelect" class="form-label">Show</label>
-        <select id="perPageSelect" class="form-select" onchange="updatePerPage()">
-          <option value="10" {% if per_page==10 %}selected{% endif %}>10</option>
-          <option value="50" {% if per_page==50 %}selected{% endif %}>50</option>
-          <option value="100" {% if per_page==100 %}selected{% endif %}>100</option>
-          <option value="500" {% if per_page==500 %}selected{% endif %}>500</option>
-        </select>
-      </div>
-      <div class="col-auto align-self-end">entries</div>
-    </div>
-
-    <!-- Short Links Table -->
-    <h3 class="mb-3">Your Short Links</h3>
-    <div class="table-responsive mb-4">
-      <table class="table table-striped align-middle">
-        <thead>
-          <tr>
-            <th>Thumbnail</th>
-            <th>Destination URL</th>
-            <th>Title</th>
-            <th>Description</th>
-            <th>UTM Source</th>
-            <th>Popup?</th>
-            <th>Clicks</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for link in links %}
-          <tr>
-            <td>
-              {% if link.image %}
-                <img src="{{ link.image }}" alt="thumb" width="50" height="50">
-              {% else %}
-                &ndash;
-              {% endif %}
-            </td>
-            <td><a href="{{ link.url }}" target="_blank">{{ link.url }}</a></td>
-            <td>{{ link.title or '–' }}</td>
-            <td>{{ link.desc or '–' }}</td>
-            <td>{{ link.id }}</td>
-            <td>
-              {% if link.popup %}
-                <span class="badge bg-primary">Yes</span>
-              {% else %}
-                <span class="badge bg-secondary">No</span>
-              {% endif %}
-            </td>
-            <td>{{ link.clicks }}</td>
-            <td>
-              <div class="btn-group" role="group">
-                <a href="{{ url_for('edit', custom_id=link.id) }}" class="btn btn-outline-secondary btn-sm">Edit</a>
-                <form action="{{ url_for('delete', custom_id=link.id) }}" method="POST" style="display:inline;">
-                  <button class="btn btn-outline-danger btn-sm">Delete</button>
-                </form>
-                <button class="btn btn-outline-primary btn-sm copy-btn"
-                        data-link="{{ request.url_root.rstrip('/') + url_for('preview', id=link.id) }}">
-                  Copy
-                </button>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination Links -->
-    <nav aria-label="Page navigation">
-      <ul class="pagination">
-        {% for p in range(1, total_pages+1) %}
-        <li class="page-item {% if p==page %}active{% endif %}">
-          <a class="page-link" href="{{ url_for('home') }}?page={{ p }}&per_page={{ per_page }}">{{ p }}</a>
-        </li>
-        {% endfor %}
-      </ul>
-    </nav>
-  </div>
-
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.tiny.cloud/1/9zoa256jx88gr3i2njll487m7bupp8ygbhyttgmc7rz4on6c/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-  <script>
-    tinymce.init({
-      selector: '#popup_text',
-      plugins: ['link','image','lists','code'],
-      toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code',
-      menubar: false,
-      height: 300
-    });
-    function updatePerPage() {
-      const per = document.getElementById('perPageSelect').value;
-      window.location.href = `{{ url_for('home') }}?page=1&per_page=${per}`;
-    }
-    document.querySelectorAll('.copy-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const url = btn.getAttribute('data-link');
-        navigator.clipboard.writeText(url).then(() => {
-          btn.textContent = 'Copied!';
-          setTimeout(() => btn.textContent = 'Copy', 2000);
-        });
-      });
-    });
-  </script>
-</body>
-</html>
