@@ -72,7 +72,6 @@
           name="image"
           value="{{ edit_data.image if edit_data }}"
           class="form-control"
-          placeholder="https://example.com/thumb.png"
         >
       </div>
 
@@ -97,7 +96,7 @@
         >{{ edit_data.popup if edit_data }}</textarea>
       </div>
 
-      <div class="d-flex justify-content-end mb-5 gap-2">
+      <div class="d-flex justify-content-end mb-5">
         <button class="btn {% if edit_data %}btn-success{% else %}btn-primary{% endif %}">
           {% if edit_data %}Save Changes{% else %}Create Link{% endif %}
         </button>
@@ -142,8 +141,12 @@
           {% for link in links %}
           <tr>
             <td><a href="{{ link.url }}" target="_blank">{{ link.url }}</a></td>
-            <td>{{ link.title or '–' }}</td>
-            <td>{{ link.desc or '–' }}</td>
+            <td title="{{ link.title }}">
+              {{ link.title.split()[:3] | join(' ') }}{% if link.title.split()|length > 3 %}...{% endif %}
+            </td>
+            <td title="{{ link.desc }}">
+              {{ link.desc.split()[:3] | join(' ') }}{% if link.desc.split()|length > 3 %}...{% endif %}
+            </td>
             <td>
               {% if link.image %}
                 <img src="{{ link.image }}" alt="thumb" width="50" height="50">
