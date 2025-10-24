@@ -15,12 +15,27 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = os.urandom(24)
 CORS(app)
 
+BOT_USER_AGENTS = [
+    'facebookexternalhit',
+    'facebot',
+    'twitterbot',
+    'slackbot',
+    'discordbot',
+    'linkedinbot',
+    'whatsapp',
+    'telegrambot',
+    'pinterest',
+    'preview',
+]
+
 # Serve robots.txt to allow all bots (including Facebook)
 @app.route('/robots.txt')
 def robots_txt():
     txt = (
         "User-agent: *\n"
         "Allow: /\n\n"
+        "User-agent: facebookexternalhit\n"
+        "Allow: /\n"
         "User-agent: facebookexternalhit/1.1\n"
         "Allow: /\n"
     )
@@ -62,6 +77,14 @@ def save_data(d):
     with open(data_file, 'w') as f:
         json.dump(d, f)
     commit_data_json()
+
+def is_bot_request():
+    ua = request.headers.get('User-Agent', '')
+    ua_lower = ua.lower()
+    if request.method == 'HEAD':
+        return True
+    return any(token in ua_lower for token in BOT_USER_AGENTS)
+
 
 @app.route('/', methods=['GET','POST'])
 def index():
@@ -198,17 +221,34 @@ def preview(id):
     utm = id
     with open(data_file, 'r') as f:
         data = json.load(f)
-    if utm in data:
-        info = data[utm]
-        info['clicks'] = info.get('clicks',0) + 1
+    record = data.get(utm)
+    if not record:
+        return redirect(url_for('index'))
+
+    info = record.copy()
+    bot_hit = is_bot_request()
+
+    if not bot_hit:
+        clicks = record.get('clicks', 0) + 1
         today = datetime.now().strftime('%Y-%m-%d')
-        log = info.get('log', {})
-        log[today] = log.get(today,0) + 1
-        info['log'] = log
-        data[utm] = info
+        log = record.get('log', {}).copy()
+        log[today] = log.get(today, 0) + 1
+        record['clicks'] = clicks
+        record['log'] = log
+        data[utm] = record
         save_data(data)
-        return render_template('og_page.html', **info, request=request)
-    return redirect(url_for('index'))
+        info['clicks'] = clicks
+        info['log'] = log
+
+    html = render_template('og_page.html', **info, request=request)
+
+    if request.method == 'HEAD':
+        response = Response(status=200, mimetype='text/html')
+        response.headers['Content-Type'] = 'text/html; charset=utf-8'
+        response.headers['Content-Length'] = str(len(html.encode('utf-8')))
+        return response
+
+    return html
 
 @app.route('/api/popup/<path:utm>')
 def popup(utm):
