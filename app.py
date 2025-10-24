@@ -1,3 +1,9 @@
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify
+from flask_cors import CORS
+import os, json, shutil
+from datetime import datetime
+from github import Github, GithubException
+from urllib.parse import urlparse, urlunparse
 from flask import Response
 
 @app.route('/robots.txt')
@@ -9,13 +15,7 @@ def robots_txt():
         "Allow: /\n",
         mimetype="text/plain"
     )
-from flask import Flask, request, render_template, redirect, url_for, session, jsonify
-from flask_cors import CORS
-import os, json, shutil
-from datetime import datetime
-from github import Github, GithubException
-from urllib.parse import urlparse, urlunparse
-
+    
 # Configuration
 REPO_NAME   = 'antoancms/subfeed'
 APP_BRANCH  = 'main'
