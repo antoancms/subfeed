@@ -1,3 +1,14 @@
+from flask import Response
+
+@app.route('/robots.txt')
+def robots_txt():
+    return Response(
+        "User-agent: *\n"
+        "Allow: /\n"
+        "User-agent: facebookexternalhit/1.1\n"
+        "Allow: /\n",
+        mimetype="text/plain"
+    )
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from flask_cors import CORS
 import os, json, shutil
