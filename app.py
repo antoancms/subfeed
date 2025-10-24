@@ -1,21 +1,10 @@
-from flask import Flask, request, render_template, redirect, url_for, session, jsonify
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify, Response
 from flask_cors import CORS
 import os, json, shutil
 from datetime import datetime
 from github import Github, GithubException
 from urllib.parse import urlparse, urlunparse
-from flask import Response
 
-@app.route('/robots.txt')
-def robots_txt():
-    return Response(
-        "User-agent: *\n"
-        "Allow: /\n"
-        "User-agent: facebookexternalhit/1.1\n"
-        "Allow: /\n",
-        mimetype="text/plain"
-    )
-    
 # Configuration
 REPO_NAME   = 'antoancms/subfeed'
 APP_BRANCH  = 'main'
@@ -25,6 +14,17 @@ PASSWORD    = '8855'
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = os.urandom(24)
 CORS(app)
+
+# Serve robots.txt to allow all bots (including Facebook)
+@app.route('/robots.txt')
+def robots_txt():
+    txt = (
+        "User-agent: *\n"
+        "Allow: /\n\n"
+        "User-agent: facebookexternalhit/1.1\n"
+        "Allow: /\n"
+    )
+    return Response(txt, mimetype="text/plain")
 
 # Paths
 base_dir      = app.root_path
@@ -153,7 +153,6 @@ def edit(custom_id):
         new_popup = request.form.get('popup_text','').strip()
         new_image = request.form.get('image','').strip()
         old = data.pop(custom_id, {})
-        # append utm to base URL
         if '?utm_source=' not in new_url:
             new_url += f"?utm_source={new_id}"
         data[new_id] = {
@@ -166,14 +165,11 @@ def edit(custom_id):
             'log':    old.get('log',{})
         }
         save_data(data)
-        # redirect to copy-link page
         full_url = request.url_root.rstrip('/') + url_for('preview', id=new_id)
         return render_template('result.html', full_url=full_url)
-    # GET: load edit form
     if custom_id not in data:
         return "Not found", 404
     rec = data[custom_id]
-    # strip existing utm from URL for editing
     parsed = urlparse(rec.get('url',''))
     base_url = urlunparse(parsed._replace(query=''))
     rec['url'] = base_url
@@ -197,7 +193,7 @@ def delete(custom_id):
     save_data(data)
     return redirect(url_for('home'))
 
-@app.route('/p/<path:id>')
+@app.route('/p/<path:id>', methods=['GET','HEAD'])
 def preview(id):
     utm = id
     with open(data_file, 'r') as f:
