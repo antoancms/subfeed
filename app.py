@@ -4,6 +4,7 @@ import os, json, shutil
 from datetime import datetime
 from github import Github, GithubException
 from urllib.parse import urlparse, urlunparse
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Configuration
 REPO_NAME   = 'antoancms/subfeed'
@@ -14,6 +15,20 @@ PASSWORD    = '8855'
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = os.urandom(24)
 CORS(app)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
+BOT_USER_AGENTS = [
+    'facebookexternalhit',
+    'facebot',
+    'twitterbot',
+    'slackbot',
+    'discordbot',
+    'linkedinbot',
+    'whatsapp',
+    'telegrambot',
+    'pinterest',
+    'preview',
+]
 
 # Serve robots.txt to allow all bots (including Facebook)
 @app.route('/robots.txt')
@@ -21,6 +36,8 @@ def robots_txt():
     txt = (
         "User-agent: *\n"
         "Allow: /\n\n"
+        "User-agent: facebookexternalhit\n"
+        "Allow: /\n"
         "User-agent: facebookexternalhit/1.1\n"
         "Allow: /\n"
     )
@@ -62,6 +79,41 @@ def save_data(d):
     with open(data_file, 'w') as f:
         json.dump(d, f)
     commit_data_json()
+
+
+def _first_header_value(header_value):
+    if not header_value:
+        return ''
+    return header_value.split(',')[0].strip()
+
+
+def external_origin():
+    scheme = _first_header_value(request.headers.get('X-Forwarded-Proto')) or request.scheme
+    host = _first_header_value(request.headers.get('X-Forwarded-Host')) or request.host
+    return f"{scheme}://{host}"
+
+
+def external_url_for(endpoint, **values):
+    origin = external_origin().rstrip('/')
+    path = url_for(endpoint, **values)
+    return f"{origin}{path}"
+
+
+def external_current_url():
+    origin = external_origin().rstrip('/')
+    if request.query_string:
+        qs = request.query_string.decode('utf-8', errors='ignore')
+        return f"{origin}{request.path}?{qs}"
+    return f"{origin}{request.path}"
+
+
+def is_bot_request():
+    ua = request.headers.get('User-Agent', '')
+    ua_lower = ua.lower()
+    if request.method == 'HEAD':
+        return True
+    return any(token in ua_lower for token in BOT_USER_AGENTS)
+
 
 @app.route('/', methods=['GET','POST'])
 def index():
@@ -136,7 +188,7 @@ def create():
         'log':    prev.get('log',{})
     }
     save_data(data)
-    full_url = request.url_root.rstrip('/') + url_for('preview', id=cid)
+    full_url = external_url_for('preview', id=cid)
     return render_template('result.html', full_url=full_url)
 
 @app.route('/edit/<custom_id>', methods=['GET','POST'])
@@ -165,7 +217,7 @@ def edit(custom_id):
             'log':    old.get('log',{})
         }
         save_data(data)
-        full_url = request.url_root.rstrip('/') + url_for('preview', id=new_id)
+        full_url = external_url_for('preview', id=new_id)
         return render_template('result.html', full_url=full_url)
     if custom_id not in data:
         return "Not found", 404
@@ -198,17 +250,36 @@ def preview(id):
     utm = id
     with open(data_file, 'r') as f:
         data = json.load(f)
-    if utm in data:
-        info = data[utm]
-        info['clicks'] = info.get('clicks',0) + 1
+    record = data.get(utm)
+    if not record:
+        return redirect(url_for('index'))
+
+    info = record.copy()
+    bot_hit = is_bot_request()
+
+    if not bot_hit:
+        clicks = record.get('clicks', 0) + 1
         today = datetime.now().strftime('%Y-%m-%d')
-        log = info.get('log', {})
-        log[today] = log.get(today,0) + 1
-        info['log'] = log
-        data[utm] = info
+        log = record.get('log', {}).copy()
+        log[today] = log.get(today, 0) + 1
+        record['clicks'] = clicks
+        record['log'] = log
+        data[utm] = record
         save_data(data)
-        return render_template('og_page.html', **info, request=request)
-    return redirect(url_for('index'))
+        info['clicks'] = clicks
+        info['log'] = log
+
+    preview_url = external_current_url()
+    html = render_template('og_page.html', **info, request=request, preview_url=preview_url)
+
+    if request.method == 'HEAD':
+        response = Response(status=200, mimetype='text/html')
+        response.headers['Content-Type'] = 'text/html; charset=utf-8'
+        response.headers['Content-Length'] = str(len(html.encode('utf-8')))
+        response.headers['Content-Location'] = preview_url
+        return response
+
+    return html
 
 @app.route('/api/popup/<path:utm>')
 def popup(utm):
