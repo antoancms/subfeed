@@ -1,101 +1,97 @@
-<!-- templates/og_page.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta property="og:title" content="{{ title }}">
-    <meta property="og:description" content="{{ desc }}">
-    <meta property="og:image" content="{{ image }}">
-    <meta property="og:url" content="{{ request.url }}">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
-    <link rel="canonical" href="{{ request.url }}">
-    <title>{{ title }}</title>
-
-    <!-- Instant redirect for users; bots will ignore JS and scrape OG tags -->
-    <script>
-        if (!navigator.userAgent.includes('facebookexternalhit') &&
-            !navigator.userAgent.includes('Twitterbot') &&
-            !navigator.userAgent.includes('Slackbot')) {
-            window.location.replace("{{ url }}");
-        }
-    </script>
-
-    <style>
-        body {
-            background: #f4f6f9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
-            text-align: center;
-            padding: 40px;
-        }
-        .card {
-            background: #fff;
-            max-width: 600px;
-            margin: auto;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-        .share-box input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-        .actions {
-            margin-top: 20px;
-        }
-        .actions button,
-        .actions a {
-            display: inline-block;
-            margin: 5px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            text-decoration: none;
-            color: #fff;
-            font-weight: bold;
-        }
-        .copy-btn {
-            background: #007BFF;
-        }
-        .fb-btn {
-            background: #4267B2;
-        }
-        .tw-btn {
-            background: #1DA1F2;
-        }
-    </style>
-</head>
-<body>
-    <noscript>
-        <meta http-equiv="refresh" content="2;url={{ url }}">
-        <p>Redirecting to <a href="{{ url }}">{{ url }}</a>...</p>
-    </noscript>
-
-    <div class="card">
-        <h2>✅ Your custom preview link is ready!</h2>
-        <p>Copy or share this link below:</p>
-        <div class="share-box">
-            <input type="text" id="share-url" value="{{ request.url }}" readonly>
-        </div>
-        <div class="actions">
-            <button class="copy-btn" onclick="copyLink()">📋 Copy Link</button>
-            <a class="fb-btn" href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank">🔗 Share on Facebook</a>
-            <a class="tw-btn" href="https://twitter.com/intent/tweet?url={{ request.url }}" target="_blank">🐦 Tweet</a>
-        </div>
-    </div>
-
-    <script>
-        function copyLink() {
-            var copyText = document.getElementById("share-url");
-            copyText.select();
-            copyText.setSelectionRange(0, 99999);
-            document.execCommand("copy");
-            alert("✅ Link copied to clipboard: " + copyText.value);
-        }
-    </script>
-</body>
-</html>
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/templates/og_page.html b/templates/og_page.html
+index 71c23c019017cfc9f1f4ed320e9ad1f0b126123f..7caba38a2d62e5d1dfa931594f66cdcf2c1e9ca9 100644
+--- a/templates/og_page.html
++++ b/templates/og_page.html
+@@ -1,37 +1,37 @@
+ <!-- templates/og_page.html -->
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta property="og:title" content="{{ title }}">
+     <meta property="og:description" content="{{ desc }}">
+     <meta property="og:image" content="{{ image }}">
+-    <meta property="og:url" content="{{ request.url }}">
++    <meta property="og:url" content="{{ preview_url }}">
+     <meta property="og:type" content="website">
+     <meta name="twitter:card" content="summary_large_image">
+-    <link rel="canonical" href="{{ request.url }}">
++    <link rel="canonical" href="{{ preview_url }}">
+     <title>{{ title }}</title>
+ 
+     <!-- Instant redirect for users; bots will ignore JS and scrape OG tags -->
+     <script>
+         if (!navigator.userAgent.includes('facebookexternalhit') &&
+             !navigator.userAgent.includes('Twitterbot') &&
+             !navigator.userAgent.includes('Slackbot')) {
+             window.location.replace("{{ url }}");
+         }
+     </script>
+ 
+     <style>
+         body {
+             background: #f4f6f9;
+             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+             color: #333;
+             text-align: center;
+             padding: 40px;
+         }
+         .card {
+             background: #fff;
+             max-width: 600px;
+             margin: auto;
+             padding: 30px;
+             border-radius: 12px;
+@@ -57,45 +57,45 @@
+             text-decoration: none;
+             color: #fff;
+             font-weight: bold;
+         }
+         .copy-btn {
+             background: #007BFF;
+         }
+         .fb-btn {
+             background: #4267B2;
+         }
+         .tw-btn {
+             background: #1DA1F2;
+         }
+     </style>
+ </head>
+ <body>
+     <noscript>
+         <meta http-equiv="refresh" content="2;url={{ url }}">
+         <p>Redirecting to <a href="{{ url }}">{{ url }}</a>...</p>
+     </noscript>
+ 
+     <div class="card">
+         <h2>✅ Your custom preview link is ready!</h2>
+         <p>Copy or share this link below:</p>
+         <div class="share-box">
+-            <input type="text" id="share-url" value="{{ request.url }}" readonly>
++            <input type="text" id="share-url" value="{{ preview_url }}" readonly>
+         </div>
+         <div class="actions">
+             <button class="copy-btn" onclick="copyLink()">📋 Copy Link</button>
+-            <a class="fb-btn" href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank">🔗 Share on Facebook</a>
+-            <a class="tw-btn" href="https://twitter.com/intent/tweet?url={{ request.url }}" target="_blank">🐦 Tweet</a>
++            <a class="fb-btn" href="https://www.facebook.com/sharer/sharer.php?u={{ preview_url }}" target="_blank">🔗 Share on Facebook</a>
++            <a class="tw-btn" href="https://twitter.com/intent/tweet?url={{ preview_url }}" target="_blank">🐦 Tweet</a>
+         </div>
+     </div>
+ 
+     <script>
+         function copyLink() {
+             var copyText = document.getElementById("share-url");
+             copyText.select();
+             copyText.setSelectionRange(0, 99999);
+             document.execCommand("copy");
+             alert("✅ Link copied to clipboard: " + copyText.value);
+         }
+     </script>
+ </body>
+ </html>
+ 
+EOF
+)
