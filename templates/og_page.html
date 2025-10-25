@@ -6,10 +6,10 @@
     <meta property="og:title" content="{{ title }}">
     <meta property="og:description" content="{{ desc }}">
     <meta property="og:image" content="{{ image }}">
-    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:url" content="{{ preview_url }}">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
-    <link rel="canonical" href="{{ request.url }}">
+    <link rel="canonical" href="{{ preview_url }}">
     <title>{{ title }}</title>
 
     <!-- Instant redirect for users; bots will ignore JS and scrape OG tags -->
@@ -79,12 +79,12 @@
         <h2>✅ Your custom preview link is ready!</h2>
         <p>Copy or share this link below:</p>
         <div class="share-box">
-            <input type="text" id="share-url" value="{{ request.url }}" readonly>
+            <input type="text" id="share-url" value="{{ preview_url }}" readonly>
         </div>
         <div class="actions">
             <button class="copy-btn" onclick="copyLink()">📋 Copy Link</button>
-            <a class="fb-btn" href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank">🔗 Share on Facebook</a>
-            <a class="tw-btn" href="https://twitter.com/intent/tweet?url={{ request.url }}" target="_blank">🐦 Tweet</a>
+            <a class="fb-btn" href="https://www.facebook.com/sharer/sharer.php?u={{ preview_url }}" target="_blank">🔗 Share on Facebook</a>
+            <a class="tw-btn" href="https://twitter.com/intent/tweet?url={{ preview_url }}" target="_blank">🐦 Tweet</a>
         </div>
     </div>
 
